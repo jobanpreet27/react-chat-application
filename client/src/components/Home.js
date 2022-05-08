@@ -64,15 +64,16 @@ const Home = ({ user, logout }) => {
 
   const postMessage = (body) => {
     try {
-      const data = saveMessage(body);
+      const dataPromise = saveMessage(body);
+      dataPromise.then((data) => {
+        if (!body.conversationId) {
+          addNewConvo(body.recipientId, data.message);
+        } else {
+          addMessageToConversation(data);
+        }
 
-      if (!body.conversationId) {
-        addNewConvo(body.recipientId, data.message);
-      } else {
-        addMessageToConversation(data);
-      }
-
-      sendMessage(data, body);
+        sendMessage(data, body);
+      });
     } catch (error) {
       console.error(error);
     }
