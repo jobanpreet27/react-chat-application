@@ -184,6 +184,10 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
+        // reversing the order of messages
+        data.forEach((conversation) => {
+          conversation.messages.reverse();
+        });
         setConversations(data);
       } catch (error) {
         console.error(error);
