@@ -62,18 +62,16 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const dataPromise = saveMessage(body);
-      dataPromise.then((data) => {
-        if (!body.conversationId) {
-          addNewConvo(body.recipientId, data.message);
-        } else {
-          addMessageToConversation(data);
-        }
+      const data = await saveMessage(body);
+      if (!body.conversationId) {
+        addNewConvo(body.recipientId, data.message);
+      } else {
+        addMessageToConversation(data);
+      }
 
-        sendMessage(data, body);
-      });
+      sendMessage(data, body);
     } catch (error) {
       console.error(error);
     }
@@ -184,7 +182,6 @@ const Home = ({ user, logout }) => {
     const fetchConversations = async () => {
       try {
         const { data } = await axios.get('/api/conversations');
-        // reversing the order of messages
         data.forEach((conversation) => {
           conversation.messages.reverse();
         });
