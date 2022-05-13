@@ -25,6 +25,7 @@ const ActiveChat = ({
   activeConversation,
   postMessage,
   messagesSeen,
+  clearUnreadCount,
 }) => {
   const classes = useStyles();
   const conversation = conversations
@@ -38,7 +39,12 @@ const ActiveChat = ({
   };
 
   useEffect(() => {
-    if (isConversation(conversation) && conversation.otherUser) {
+    if (
+      isConversation(conversation) &&
+      conversation.otherUser &&
+      conversation.unreadCount > 0
+    ) {
+      clearUnreadCount(conversation.id);
       messagesSeen({
         senderId: conversation.otherUser.id,
         conversationId: conversation.id,

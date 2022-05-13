@@ -189,6 +189,20 @@ const Home = ({ user, logout }) => {
     },
     [user.id]
   );
+  const clearUnreadCount = function (conversationId) {
+    setConversations((conversations) =>
+      conversations.map((convo) => {
+        if (convo.id === conversationId) {
+          const convoCopy = {
+            ...convo,
+          };
+          convoCopy.unreadCount = 0;
+          return convoCopy;
+        }
+        return convo;
+      })
+    );
+  };
 
   // Lifecycle
 
