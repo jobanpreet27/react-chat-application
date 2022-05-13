@@ -152,6 +152,7 @@ const Home = ({ user, logout }) => {
       })
     );
   }, []);
+
   const messagesSeen = async (data) => {
     try {
       axios.patch('/api/messages/seen-status', data);
@@ -160,7 +161,27 @@ const Home = ({ user, logout }) => {
       console.log(error);
     }
   };
-  const handleMessagesRead = (data) => {};
+  const handleMessagesRead = useCallback(
+    (data) => {
+      const { conversationId } = data;
+      setConversations((conversations) =>
+        conversations.map((convo) => {
+          if (convo.id === conversationId) {
+            const convoCopy = {
+              ...convo,
+              lastReadMessageId: convo.messages.findLast((message) => {
+                if (message.senderId === user.id) return true;
+                else return false;
+              }).id,
+            };
+            return convoCopy;
+          }
+          return convo;
+        })
+      );
+    },
+    [user.id]
+  );
 
   // Lifecycle
 
@@ -179,7 +200,13 @@ const Home = ({ user, logout }) => {
       socket.off('new-message', addMessageToConversation);
       socket.off('messages-read', handleMessagesRead);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [
+    addMessageToConversation,
+    addOnlineUser,
+    removeOfflineUser,
+    handleMessagesRead,
+    socket,
+  ]);
 
   useEffect(() => {
     // when fetching, prevent redirect
