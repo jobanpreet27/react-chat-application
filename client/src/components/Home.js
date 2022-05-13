@@ -93,33 +93,36 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
-  const addMessageToConversation = useCallback((data) => {
-    // if sender isn't null, that means the message needs to be put in a brand new convo
-    const { message, sender = null } = data;
-    if (sender !== null) {
-      const newConvo = {
-        id: message.conversationId,
-        otherUser: sender,
-        messages: [message],
-        unreadCount: 1,
-      };
-      newConvo.latestMessageText = message.text;
-      setConversations((prev) => [newConvo, ...prev]);
-    }
-    setConversations((conversations) =>
-      conversations.map((convo) => {
-        if (convo.id === message.conversationId) {
-          const convoCopy = { ...convo };
-          convoCopy.messages.push(message);
-          convoCopy.latestMessageText = message.text;
-          convoCopy.unreadCount += 1;
-          return convoCopy;
-        } else {
-          return convo;
-        }
-      })
-    );
-  }, []);
+  const addMessageToConversation = useCallback(
+    (data) => {
+      // if sender isn't null, that means the message needs to be put in a brand new convo
+      const { message, sender = null } = data;
+      if (sender !== null) {
+        const newConvo = {
+          id: message.conversationId,
+          otherUser: sender,
+          messages: [message],
+          unreadCount: 1,
+        };
+        newConvo.latestMessageText = message.text;
+        setConversations((prev) => [newConvo, ...prev]);
+      }
+      setConversations((conversations) =>
+        conversations.map((convo) => {
+          if (convo.id === message.conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages.push(message);
+            convoCopy.latestMessageText = message.text;
+            if (user.id !== message.senderId) convoCopy.unreadCount += 1;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      );
+    },
+    [user.id]
+  );
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
@@ -158,27 +161,31 @@ const Home = ({ user, logout }) => {
       axios.patch('/api/messages/seen-status', data);
       socket.emit('messages-read', data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
   const handleMessagesRead = useCallback(
     (data) => {
-      const { conversationId } = data;
-      setConversations((conversations) =>
-        conversations.map((convo) => {
-          if (convo.id === conversationId) {
-            const convoCopy = {
-              ...convo,
-              lastReadMessageId: convo.messages.findLast((message) => {
-                if (message.senderId === user.id) return true;
-                else return false;
-              }).id,
-            };
-            return convoCopy;
-          }
-          return convo;
-        })
-      );
+      const { senderId, conversationId } = data;
+      if (senderId === user.id) {
+        setConversations((conversations) =>
+          conversations.map((convo) => {
+            if (convo.id === conversationId) {
+              const convoCopy = {
+                ...convo,
+              };
+              convoCopy.lastReadMessageId = convo.messages.findLast(
+                (message) => {
+                  if (message.senderId === user.id) return true;
+                  else return false;
+                }
+              ).id;
+              return convoCopy;
+            }
+            return convo;
+          })
+        );
+      }
     },
     [user.id]
   );
@@ -262,6 +269,7 @@ const Home = ({ user, logout }) => {
           user={user}
           postMessage={postMessage}
           messagesSeen={messagesSeen}
+          clearUnreadCount={clearUnreadCount}
         />
       </Grid>
     </>
