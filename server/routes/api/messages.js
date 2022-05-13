@@ -51,7 +51,6 @@ router.patch("/seen-status", async (req, res, next) => {
     const userId = req.user.id;
     const { conversationId, senderId } = req.body;
     let conversation = await Conversation.findConversation(senderId, userId);
-    console.log(conversationId + " " + senderId + " " + conversation);
     if (!conversation || conversationId !== conversation.id) {
       return res.sendStatus(403);
     }
