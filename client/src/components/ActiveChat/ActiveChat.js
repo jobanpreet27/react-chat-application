@@ -43,8 +43,10 @@ const ActiveChat = ({
         senderId: conversation.otherUser.id,
         conversationId: conversation.id,
       });
+      console.log(conversation.lastReadMessageId);
     }
   });
+
   return (
     <Box className={classes.root}>
       {isConversation(conversation) && conversation.otherUser && (
@@ -60,6 +62,7 @@ const ActiveChat = ({
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
+                  lastReadMessageId={conversation.lastReadMessageId}
                 />
                 <Input
                   otherUser={conversation.otherUser}

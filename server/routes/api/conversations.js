@@ -75,7 +75,7 @@ router.get("/", async (req, res, next) => {
       });
       convoJSON.latestMessageText = convoJSON.messages[0].text;
       conversations[i] = convoJSON;
-      //set property for id of last messages read by other user
+      //set property for id of last message read by other user
       convoJSON.lastReadMessageId = null;
       convoJSON.messages.map((message) => {
         if (
