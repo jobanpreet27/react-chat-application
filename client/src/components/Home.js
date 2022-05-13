@@ -101,6 +101,7 @@ const Home = ({ user, logout }) => {
         id: message.conversationId,
         otherUser: sender,
         messages: [message],
+        unreadCount: 1,
       };
       newConvo.latestMessageText = message.text;
       setConversations((prev) => [newConvo, ...prev]);
@@ -111,6 +112,7 @@ const Home = ({ user, logout }) => {
           const convoCopy = { ...convo };
           convoCopy.messages.push(message);
           convoCopy.latestMessageText = message.text;
+          convoCopy.unreadCount += 1;
           return convoCopy;
         } else {
           return convo;

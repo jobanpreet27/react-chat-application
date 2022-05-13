@@ -43,10 +43,8 @@ const ActiveChat = ({
         senderId: conversation.otherUser.id,
         conversationId: conversation.id,
       });
-      console.log(conversation.lastReadMessageId);
     }
   });
-
   return (
     <Box className={classes.root}>
       {isConversation(conversation) && conversation.otherUser && (
