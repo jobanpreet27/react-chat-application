@@ -150,6 +150,15 @@ const Home = ({ user, logout }) => {
       })
     );
   }, []);
+  const messagesSeen = async (data) => {
+    try {
+      axios.patch('/api/messages/seen-status', data);
+      socket.emit('messages-read', data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleMessagesRead = (data) => {};
 
   // Lifecycle
 
@@ -158,6 +167,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('messages-read', handleMessagesRead);
 
     return () => {
       // before the component is destroyed
@@ -165,6 +175,7 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('messages-read', handleMessagesRead);
     };
   }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
 
@@ -221,6 +232,7 @@ const Home = ({ user, logout }) => {
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          messagesSeen={messagesSeen}
         />
       </Grid>
     </>
