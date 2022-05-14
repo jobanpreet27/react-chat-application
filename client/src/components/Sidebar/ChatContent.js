@@ -57,10 +57,8 @@ const ChatContent = ({ conversation }) => {
         </Typography>
       </Box>
       <Box>
-        {unreadCount > 0 ? (
+        {unreadCount > 0 && (
           <Card className={classes.unreadCount}>{unreadCount}</Card>
-        ) : (
-          ''
         )}
       </Box>
     </Box>

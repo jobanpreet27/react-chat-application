@@ -164,7 +164,7 @@ const Home = ({ user, logout }) => {
       console.error(error);
     }
   };
-  const handleMessagesRead = useCallback(
+  const markLastReadMessageId = useCallback(
     (data) => {
       const { senderId, conversationId } = data;
       if (senderId === user.id) {
@@ -211,7 +211,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    socket.on('messages-read', handleMessagesRead);
+    socket.on('messages-read', markLastReadMessageId);
 
     return () => {
       // before the component is destroyed
@@ -219,13 +219,13 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
-      socket.off('messages-read', handleMessagesRead);
+      socket.off('messages-read', markLastReadMessageId);
     };
   }, [
     addMessageToConversation,
     addOnlineUser,
     removeOfflineUser,
-    handleMessagesRead,
+    markLastReadMessageId,
     socket,
   ]);
 
