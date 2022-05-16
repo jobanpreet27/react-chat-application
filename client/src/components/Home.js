@@ -81,7 +81,7 @@ const Home = ({ user, logout }) => {
     setConversations((conversations) =>
       conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          const convoCopy = { ...convo };
+          const convoCopy = { ...convo, messages: [...convo.messages] };
           convoCopy.messages.push(message);
           convoCopy.latestMessageText = message.text;
           convo.id = message.conversationId;
@@ -97,6 +97,8 @@ const Home = ({ user, logout }) => {
     (data) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
       const { message, sender = null } = data;
+      console.log(message);
+      console.log(sender);
       if (sender !== null) {
         const newConvo = {
           id: message.conversationId,
@@ -106,20 +108,21 @@ const Home = ({ user, logout }) => {
         };
         newConvo.latestMessageText = message.text;
         setConversations((prev) => [newConvo, ...prev]);
-      }
-      setConversations((conversations) =>
-        conversations.map((convo) => {
-          if (convo.id === message.conversationId) {
-            const convoCopy = { ...convo };
-            convoCopy.messages.push(message);
-            convoCopy.latestMessageText = message.text;
-            if (user.id !== message.senderId) convoCopy.unreadCount += 1;
-            return convoCopy;
-          } else {
-            return convo;
-          }
-        })
-      );
+      } else
+        setConversations((conversations) =>
+          conversations.map((convo) => {
+            if (convo.id === message.conversationId) {
+              const convoCopy = { ...convo, messages: [...convo.messages] };
+              convoCopy.messages.push(message);
+              convoCopy.latestMessageText = message.text;
+              if (user.id !== message.senderId) convoCopy.unreadCount += 1;
+              return convoCopy;
+            } else {
+              return convo;
+            }
+          })
+        );
+      console.log(conversations);
     },
     [user.id]
   );
