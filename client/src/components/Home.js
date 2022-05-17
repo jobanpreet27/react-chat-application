@@ -81,14 +81,15 @@ const Home = ({ user, logout }) => {
     setConversations((conversations) =>
       conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          const convoCopy = { ...convo, messages: [...convo.messages] };
-          convoCopy.messages.push(message);
-          convoCopy.latestMessageText = message.text;
-          convo.id = message.conversationId;
-          return convoCopy;
-        } else {
-          return convo;
+          return {
+            ...convo,
+            messages: [...convo.messages, message],
+            latestMessageText: message.text,
+            id: message.conversationId,
+            unreadCount: 0,
+          };
         }
+        return convo;
       })
     );
   }, []);
@@ -97,8 +98,6 @@ const Home = ({ user, logout }) => {
     (data) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
       const { message, sender = null } = data;
-      console.log(message);
-      console.log(sender);
       if (sender !== null) {
         const newConvo = {
           id: message.conversationId,
@@ -124,7 +123,7 @@ const Home = ({ user, logout }) => {
         );
       console.log(conversations);
     },
-    [user.id]
+    [user.id, conversations]
   );
 
   const setActiveChat = (username) => {
