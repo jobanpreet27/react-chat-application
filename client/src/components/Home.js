@@ -121,7 +121,6 @@ const Home = ({ user, logout }) => {
             }
           })
         );
-      console.log(conversations);
     },
     [user.id, conversations]
   );
