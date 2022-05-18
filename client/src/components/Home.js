@@ -122,7 +122,7 @@ const Home = ({ user, logout }) => {
           })
         );
     },
-    [user.id, conversations]
+    [user.id]
   );
 
   const setActiveChat = (username) => {
@@ -171,7 +171,7 @@ const Home = ({ user, logout }) => {
       if (senderId === user.id) {
         setConversations((conversations) =>
           conversations.map((convo) => {
-            if (convo.id === conversationId) {
+            if (convo.id === conversationId && convo.messages) {
               const convoCopy = {
                 ...convo,
               };
