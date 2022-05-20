@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box } from '@material-ui/core';
 import { Input, Header, Messages } from './index';
@@ -24,9 +24,10 @@ const ActiveChat = ({
   conversations,
   activeConversation,
   postMessage,
+  messagesSeen,
+  clearUnreadCount,
 }) => {
   const classes = useStyles();
-
   const conversation = conversations
     ? conversations.find(
         (conversation) => conversation.otherUser.username === activeConversation
@@ -37,6 +38,19 @@ const ActiveChat = ({
     return obj !== {} && obj !== undefined;
   };
 
+  useEffect(() => {
+    if (
+      isConversation(conversation) &&
+      conversation.otherUser &&
+      conversation.unreadCount > 0
+    ) {
+      clearUnreadCount(conversation.id);
+      messagesSeen({
+        senderId: conversation.otherUser.id,
+        conversationId: conversation.id,
+      });
+    }
+  });
   return (
     <Box className={classes.root}>
       {isConversation(conversation) && conversation.otherUser && (
@@ -52,6 +66,7 @@ const ActiveChat = ({
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
+                  lastReadMessageId={conversation.lastReadMessageId}
                 />
                 <Input
                   otherUser={conversation.otherUser}

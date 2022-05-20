@@ -81,43 +81,51 @@ const Home = ({ user, logout }) => {
     setConversations((conversations) =>
       conversations.map((convo) => {
         if (convo.otherUser.id === recipientId) {
-          const convoCopy = { ...convo, messages: [ ...convo.messages ] }
-          convoCopy.messages.push(message);
-          convoCopy.latestMessageText = message.text;
-          convo.id = message.conversationId;
-          return convoCopy;
-        } else {
-          return convo;
+          return {
+            ...convo,
+            messages: [...convo.messages, message],
+            latestMessageText: message.text,
+            id: message.conversationId,
+            unreadCount: 0,
+          };
+
         }
+        return convo;
       })
     );
   }, []);
 
-  const addMessageToConversation = useCallback((data) => {
-    // if sender isn't null, that means the message needs to be put in a brand new convo
-    const { message, sender = null } = data;
-    if (sender !== null) {
-      const newConvo = {
-        id: message.conversationId,
-        otherUser: sender,
-        messages: [message],
-      };
-      newConvo.latestMessageText = message.text;
-      setConversations((prev) => [newConvo, ...prev]);
-    }
-    setConversations((conversations) =>
-      conversations.map((convo) => {
-        if (convo.id === message.conversationId) {
-          const convoCopy = { ...convo, messages: [ ...convo.messages ] }
-          convoCopy.messages.push(message);
-          convoCopy.latestMessageText = message.text;
-          return convoCopy;
-        } else {
-          return convo;
-        }
-      })
-    );
-  }, []);
+  const addMessageToConversation = useCallback(
+    (data) => {
+      // if sender isn't null, that means the message needs to be put in a brand new convo
+      const { message, sender = null } = data;
+      if (sender !== null) {
+        const newConvo = {
+          id: message.conversationId,
+          otherUser: sender,
+          messages: [message],
+          unreadCount: 1,
+        };
+        newConvo.latestMessageText = message.text;
+        setConversations((prev) => [newConvo, ...prev]);
+      } else
+        setConversations((conversations) =>
+          conversations.map((convo) => {
+            if (convo.id === message.conversationId) {
+              const convoCopy = { ...convo, messages: [...convo.messages] };
+              convoCopy.messages.push(message);
+              convoCopy.latestMessageText = message.text;
+              if (user.id !== message.senderId) convoCopy.unreadCount += 1;
+              return convoCopy;
+            } else {
+              return convo;
+            }
+          })
+        );
+    },
+    [user.id]
+  );
+
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
@@ -151,6 +159,53 @@ const Home = ({ user, logout }) => {
     );
   }, []);
 
+  const messagesSeen = async (data) => {
+    try {
+      axios.patch('/api/messages/seen-status', data);
+      socket.emit('messages-read', data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const markLastReadMessageId = useCallback(
+    (data) => {
+      const { senderId, conversationId } = data;
+      if (senderId === user.id) {
+        setConversations((conversations) =>
+          conversations.map((convo) => {
+            if (convo.id === conversationId && convo.messages) {
+              const convoCopy = {
+                ...convo,
+              };
+              convoCopy.lastReadMessageId = convo.messages.findLast(
+                (message) => {
+                  return message.senderId === user.id;
+                }
+              ).id;
+              return convoCopy;
+            }
+            return convo;
+          })
+        );
+      }
+    },
+    [user.id]
+  );
+  const clearUnreadCount = function (conversationId) {
+    setConversations((conversations) =>
+      conversations.map((convo) => {
+        if (convo.id === conversationId) {
+          const convoCopy = {
+            ...convo,
+          };
+          convoCopy.unreadCount = 0;
+          return convoCopy;
+        }
+        return convo;
+      })
+    );
+  };
+
   // Lifecycle
 
   useEffect(() => {
@@ -158,6 +213,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('messages-read', markLastReadMessageId);
 
     return () => {
       // before the component is destroyed
@@ -165,8 +221,15 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('messages-read', markLastReadMessageId);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [
+    addMessageToConversation,
+    addOnlineUser,
+    removeOfflineUser,
+    markLastReadMessageId,
+    socket,
+  ]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -221,6 +284,8 @@ const Home = ({ user, logout }) => {
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          messagesSeen={messagesSeen}
+          clearUnreadCount={clearUnreadCount}
         />
       </Grid>
     </>

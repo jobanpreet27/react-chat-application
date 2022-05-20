@@ -43,4 +43,25 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.patch("/seen-status", async (req, res, next) => {
+  if (!req.user) {
+    res.sendStatus(401);
+  }
+  try {
+    const userId = req.user.id;
+    const { conversationId, senderId } = req.body;
+    let conversation = await Conversation.findConversation(senderId, userId);
+    if (!conversation || conversationId !== conversation.id) {
+      return res.sendStatus(403);
+    }
+    await Message.update(
+      { isSeen: true },
+      { where: { conversationId, senderId } }
+    );
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
