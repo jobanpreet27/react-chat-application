@@ -177,8 +177,7 @@ const Home = ({ user, logout }) => {
               };
               convoCopy.lastReadMessageId = convo.messages.findLast(
                 (message) => {
-                  if (message.senderId === user.id) return true;
-                  else return false;
+                  return message.senderId === user.id;
                 }
               ).id;
               return convoCopy;
