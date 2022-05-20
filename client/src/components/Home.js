@@ -88,6 +88,7 @@ const Home = ({ user, logout }) => {
             id: message.conversationId,
             unreadCount: 0,
           };
+
         }
         return convo;
       })
@@ -124,6 +125,7 @@ const Home = ({ user, logout }) => {
     },
     [user.id]
   );
+
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
