@@ -1,0 +1,29 @@
+const db = require("../db");
+const Sequelize = require("sequelize");
+const Conversation = require("./conversation");
+const User = require("./user");
+
+const Group = db.define("group", {
+  conversationId: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: {
+      model: Conversation,
+      key: "id",
+    },
+  },
+  userId: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: "id",
+    },
+  },
+  lastReadMessageId: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
+});
+
+module.exports = ConversationMember;
